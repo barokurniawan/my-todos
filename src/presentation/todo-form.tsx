@@ -4,7 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import { AddAPhoto, ArrowBack, DeleteForever, Photo } from '@mui/icons-material';
+import { ArrowBack } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -69,6 +69,15 @@ export default function FormTodo() {
             return;
         }
 
+        const file = files![0];
+        if ((file.size / 1024) > 1024) {
+            setAlert({
+                status: "error",
+                message: "Maximum image size is 1mb (1024kb)"
+            });
+            return;
+        }
+
         const reader = new FileReader();
         reader.onloadend = function () {
             if (!reader.result) {
@@ -78,7 +87,7 @@ export default function FormTodo() {
             setImageSnapshot(reader.result.toString());
         }
 
-        reader.readAsDataURL(files![0]);
+        reader.readAsDataURL(file);
     }
 
     return (
@@ -106,9 +115,11 @@ export default function FormTodo() {
                     </Grid>
 
                     {
-                        alert && (alert.status == "success"
-                            ? <AlertSuccess msg={alert.message} />
-                            : <AlertError msg={alert?.message} />)
+                        alert && (
+                            alert.status == "success"
+                                ? <AlertSuccess style={{ width: "100%", marginBottom: "14px" }} msg={alert.message} />
+                                : <AlertError style={{ width: "100%", marginBottom: "14px" }} msg={alert?.message} />
+                        )
                     }
 
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
@@ -136,8 +147,8 @@ export default function FormTodo() {
 
                             <Grid item xs={12}>
                                 {
-                                    imageSnapshot 
-                                        ? (<FormImagePreview imageSnapshot={imageSnapshot} onDelete={() => setImageSnapshot("")} />) 
+                                    imageSnapshot
+                                        ? (<FormImagePreview imageSnapshot={imageSnapshot} onDelete={() => setImageSnapshot("")} />)
                                         : (<FormSelectImage onFileSelected={onFileSelected} />)
                                 }
 

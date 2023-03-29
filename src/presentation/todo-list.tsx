@@ -1,13 +1,12 @@
 import React from "react";
-import { Box, Button, Card, Checkbox, Container, CssBaseline, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { Box, Button, Card, Checkbox, Container, CssBaseline, Grid, ThemeProvider, Typography, createTheme } from "@mui/material";
 import { MyTodo, fetchTodos, removeTodo, updateTodo } from "../persisntace/todos";
 import { useNavigate } from "react-router-dom";
-import { DeleteForever, FastRewind } from "@mui/icons-material";
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DeleteForever, Edit } from "@mui/icons-material";
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 
 const theme = createTheme();
 const TodoList = () => {
-    const [checked, setChecked] = React.useState([1]);
     const [listTodo, setListTodo] = React.useState<MyTodo[]>([]);
     const navigateApp = useNavigate();
     const columns: GridColDef[] = [
@@ -31,13 +30,13 @@ const TodoList = () => {
                 }
 
                 return (
-                    <Box component={"img"} width={120} 
+                    <Box component={"img"} width={120}
                         src={row.imageSnapshot}
                         style={{
                             border: "1x solid #eaeaea",
                             borderRadius: "10px",
                             backgroundColor: "grey"
-                        }} 
+                        }}
                     />
                 )
             }
@@ -47,7 +46,16 @@ const TodoList = () => {
             field: 'action', headerName: 'Action', width: 130,
             renderCell(value: any) {
                 const { row } = value;
-                return (<Button onClick={() => handleRemoveTodo(listTodo, row.description)}><DeleteForever /></Button>);
+                return (
+                    <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                            <Button onClick={() => handleRemoveTodo(listTodo, row.description)}><DeleteForever color="error" /></Button>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Button onClick={() => handleRemoveTodo(listTodo, row.description)}><Edit color="warning" /></Button>
+                        </Grid>
+                    </Grid>
+                );
             },
         },
     ];
