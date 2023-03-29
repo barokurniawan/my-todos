@@ -44,10 +44,15 @@ export default function FormTodo() {
                 status: "success",
                 message: "Todo saved successfully"
             });
-        } catch (error) {
+        } catch (error: any) {
+            let errorMessage = "Unable to handle the request";
+            if(typeof error == "string") {
+                errorMessage = error.toString();
+            }
+
             setAlert({
                 status: "error",
-                message: "Unable to handle the request"
+                message: errorMessage
             });
         }
     };

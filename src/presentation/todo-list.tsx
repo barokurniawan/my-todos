@@ -2,25 +2,34 @@ import React from "react";
 import { Box, Button, Card, Checkbox, Container, CssBaseline, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, createTheme } from "@mui/material";
 import { MyTodo, fetchTodos, removeTodo, updateTodo } from "../persisntace/todos";
 import { useNavigate } from "react-router-dom";
+import { DeleteForever, FastRewind } from "@mui/icons-material";
+import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 
 const theme = createTheme();
 const TodoList = () => {
     const [checked, setChecked] = React.useState([1]);
     const [listTodo, setListTodo] = React.useState<MyTodo[]>([]);
     const navigateApp = useNavigate();
-
-    const handleToggle = (value: number) => () => {
-        const currentIndex = checked.indexOf(value);
-        const newChecked = [...checked];
-
-        if (currentIndex === -1) {
-            newChecked.push(value);
-        } else {
-            newChecked.splice(currentIndex, 1);
-        }
-
-        setChecked(newChecked);
-    };
+    const columns: GridColDef[] = [
+        { field: 'description', headerName: 'Description', width: 130, sortable: false, },
+        { field: 'dueDate', headerName: 'Due Date', width: 130 },
+        { 
+            sortable: false,
+            field: 'isDone', headerName: 'Done', width: 130,
+            renderCell(value: any){
+                const {row} = value;
+                return (<Checkbox checked={row.isDone} onChange={() => handleCheckTodo(listTodo, row)} />);
+            }
+        },
+        {
+            sortable: false,
+            field: 'action', headerName: 'Action', width: 130,
+            renderCell(value: any) {
+                const { row } = value;
+                return (<Button onClick={() => handleRemoveTodo(listTodo, row.description)}><DeleteForever /></Button>);
+            },
+        },
+    ];
 
     function getAllTodos() {
         let todos = fetchTodos();
@@ -31,14 +40,9 @@ const TodoList = () => {
         setListTodo(todos);
     }
 
-    function handleCheckTodo(items: MyTodo[], item: MyTodo, index: number) {
-        const newItem = items.at(index);
-        if (!newItem) {
-            return;
-        }
-
-        newItem.isDone = !newItem.isDone;
-        updateTodo(items, newItem, index);
+    function handleCheckTodo(items: MyTodo[], item: MyTodo) {
+        item.isDone = !item.isDone;
+        updateTodo(items, item);
         getAllTodos();
     }
 
@@ -76,37 +80,16 @@ const TodoList = () => {
                                 </Grid>
                             </Grid>
 
-                            <TableContainer>
-                                <Table aria-label="simple table">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Descriptio</TableCell>
-                                            <TableCell>Due Date</TableCell>
-                                            <TableCell>Done</TableCell>
-                                            <TableCell>#</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {
-                                            listTodo.length > 0 ? listTodo.map((row, i) => (
-                                                <TableRow
-                                                    key={row.description}
-                                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                                >
-                                                    <TableCell component="th" scope="row">{row.description}</TableCell>
-                                                    <TableCell>{row.dueDate}</TableCell>
-                                                    <TableCell>
-                                                        <Checkbox checked={row.isDone} onChange={() => handleCheckTodo(listTodo, row, i)} />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Button onClick={() => handleRemoveTodo(listTodo, row.description)}>[X]</Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )) : <div style={{ color: "grey", padding: 10 }}>No data available</div>
-                                        }
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
+                            <div style={{ height: 400, width: '100%' }}>
+                                <DataGrid
+                                    rows={listTodo}
+                                    columns={columns}
+                                    disableColumnMenu
+                                    disableColumnSelector
+                                    disableRowSelectionOnClick
+                                    hideFooterPagination={true}
+                                />
+                            </div>
                         </Box>
                     </Card>
                 </Box>
