@@ -6,6 +6,7 @@ interface MyTodo {
     id?: string;
     description: string;
     dueDate: string;
+    imageSnapshot?: string;
     isDone: boolean;
 }
 

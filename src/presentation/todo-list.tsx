@@ -13,12 +13,33 @@ const TodoList = () => {
     const columns: GridColDef[] = [
         { field: 'description', headerName: 'Description', width: 130, sortable: false, },
         { field: 'dueDate', headerName: 'Due Date', width: 130 },
-        { 
+        {
             sortable: false,
             field: 'isDone', headerName: 'Done', width: 130,
-            renderCell(value: any){
-                const {row} = value;
+            renderCell(value: any) {
+                const { row } = value;
                 return (<Checkbox checked={row.isDone} onChange={() => handleCheckTodo(listTodo, row)} />);
+            }
+        },
+        {
+            sortable: false,
+            field: "imageSnapshot", headerName: "Image", width: 115,
+            renderCell(value: any) {
+                const { row } = value as { row: MyTodo };
+                if (!row.imageSnapshot) {
+                    return "";
+                }
+
+                return (
+                    <Box component={"img"} width={120} 
+                        src={row.imageSnapshot}
+                        style={{
+                            border: "1x solid #eaeaea",
+                            borderRadius: "10px",
+                            backgroundColor: "grey"
+                        }} 
+                    />
+                )
             }
         },
         {
