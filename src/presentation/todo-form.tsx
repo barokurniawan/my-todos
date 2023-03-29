@@ -8,12 +8,12 @@ import { ArrowBack } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs'
 import { AlertError, AlertSuccess } from '../widgets/alerts';
-import { saveTodo } from '../persisntace/todos';
+import { MyTodo, saveTodo } from '../persisntace/todos';
 import FormImagePreview from './widgets/form-image-preview';
 import FormSelectImage from './widgets/form-select-image';
 
@@ -24,6 +24,8 @@ export default function FormTodo() {
     const [alert, setAlert] = React.useState<{ status: "warning" | "success" | "info" | "error", message: string } | null>(null);
     const [imageSnapshot, setImageSnapshot] = React.useState("");
     const navigateApp = useNavigate();
+    const location = useLocation();
+    const [todo, setTodo] = React.useState<MyTodo | null>(null);
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -90,6 +92,24 @@ export default function FormTodo() {
         reader.readAsDataURL(file);
     }
 
+    const isEditMode = () => {
+        return todo != null;
+    }
+
+    React.useEffect(() => {
+        const {data} = location.state;
+        if(!data) {
+            return;
+        }
+
+        console.log("data:", data);
+        
+        setTodo(data);
+        setImageSnapshot(data.imageSnapshot);
+        setDesc(data.description);
+        setDueDate(data.dueDate);
+    }, []);
+
     return (
         <ThemeProvider theme={theme}>
             <Container component="main" maxWidth="xs">
@@ -110,7 +130,7 @@ export default function FormTodo() {
                             </Button>
                         </Grid>
                         <Grid item xs={8}>
-                            <Typography>Form Create Todo</Typography>
+                            <Typography>{isEditMode() ? "Form Edit Todo" : "Form Create Todo"}</Typography>
                         </Grid>
                     </Grid>
 
@@ -135,6 +155,7 @@ export default function FormTodo() {
                                     label="Description"
                                     autoFocus
                                     onChange={evt => setDesc(evt.target.value)}
+                                    value={desc}
                                     helperText="Max 32 char"
                                 />
                             </Grid>

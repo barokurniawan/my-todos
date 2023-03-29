@@ -52,7 +52,7 @@ const TodoList = () => {
                             <Button onClick={() => handleRemoveTodo(listTodo, row.description)}><DeleteForever color="error" /></Button>
                         </Grid>
                         <Grid item xs={6}>
-                            <Button onClick={() => handleRemoveTodo(listTodo, row.description)}><Edit color="warning" /></Button>
+                            <Button onClick={() => navigateApp("/form-todo?edit", {state: {data: row}})}><Edit color="warning" /></Button>
                         </Grid>
                     </Grid>
                 );
