@@ -1,4 +1,5 @@
 import uuidv4 from "../helpers/uuidv4";
+import { isLogedIn } from "./session";
 
 const TODOS_KEY = "TODO_LIST";
 
@@ -24,6 +25,10 @@ const replaceTodos = (items: MyTodo[]) => {
 }
 
 const saveTodo = (todo: MyTodo) => {
+    if(!isLogedIn()) {
+        throw "Authentication is required";
+    }
+
     if(!todo.dueDate) {
         throw "Due date is required";
     }
@@ -45,11 +50,24 @@ const saveTodo = (todo: MyTodo) => {
 }
 
 const removeTodo = (items: MyTodo[], title: string) => {
+    if(!isLogedIn()) {
+        throw "Authentication is required";
+    }
+
     const newItems = items.filter(e => e.description != title);
     replaceTodos(newItems);
 }
 
-const updateTodo = (items: MyTodo[], item: MyTodo) => {
+const updateTodo = (item: MyTodo) => {
+    if(!isLogedIn()) {
+        throw "Authentication is required";
+    }
+
+    let items = fetchTodos();
+    if(items == null || items.length == 0) {
+        throw new Error("Update failed, list todo is empty!");
+    }
+
     items = items.filter(i => i.id != item.id);
     items.push(item);
     replaceTodos(items);

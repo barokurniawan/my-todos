@@ -13,7 +13,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs'
 import { AlertError, AlertSuccess } from '../widgets/alerts';
-import { MyTodo, saveTodo } from '../persisntace/todos';
+import { MyTodo, saveTodo, updateTodo } from '../persisntace/todos';
 import FormImagePreview from './widgets/form-image-preview';
 import FormSelectImage from './widgets/form-select-image';
 
@@ -40,17 +40,34 @@ export default function FormTodo() {
         }
 
         try {
-            saveTodo({
-                description: desc,
-                dueDate: dueDate,
-                isDone: false,
-                imageSnapshot: imageSnapshot
-            });
+            if (isEditMode()) {
+                console.log("Updating todo: ", desc);
 
-            setAlert({
-                status: "success",
-                message: "Todo saved successfully"
-            });
+                updateTodo({
+                    id: todo!.id,
+                    description: desc,
+                    dueDate: dueDate,
+                    isDone: todo!.isDone,
+                    imageSnapshot: imageSnapshot
+                });
+
+                setAlert({
+                    status: "success",
+                    message: "Todo updated successfully"
+                });
+            } else {
+                saveTodo({
+                    description: desc,
+                    dueDate: dueDate,
+                    isDone: false,
+                    imageSnapshot: imageSnapshot
+                });
+
+                setAlert({
+                    status: "success",
+                    message: "Todo saved successfully"
+                });
+            }
         } catch (error: any) {
             let errorMessage = "Unable to handle the request";
             if (typeof error == "string") {
@@ -97,17 +114,19 @@ export default function FormTodo() {
     }
 
     React.useEffect(() => {
-        const {data} = location.state;
-        if(!data) {
-            return;
-        }
+        if (location.state) {
+            const { data } = location.state;
+            if (!data) {
+                return;
+            }
 
-        console.log("data:", data);
-        
-        setTodo(data);
-        setImageSnapshot(data.imageSnapshot);
-        setDesc(data.description);
-        setDueDate(data.dueDate);
+            console.log("data:", data);
+
+            setTodo(data);
+            setImageSnapshot(data.imageSnapshot);
+            setDesc(data.description);
+            setDueDate(data.dueDate);
+        }
     }, []);
 
     return (

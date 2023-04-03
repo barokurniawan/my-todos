@@ -2,8 +2,9 @@ import React from "react";
 import { Box, Button, Card, Checkbox, Container, CssBaseline, Grid, ThemeProvider, Typography, createTheme } from "@mui/material";
 import { MyTodo, fetchTodos, removeTodo, updateTodo } from "../persisntace/todos";
 import { useNavigate } from "react-router-dom";
-import { DeleteForever, Edit } from "@mui/icons-material";
+import { DeleteForever, Edit, Login, Logout } from "@mui/icons-material";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import * as Session from "../persisntace/session";
 
 const theme = createTheme();
 const TodoList = () => {
@@ -17,7 +18,7 @@ const TodoList = () => {
             field: 'isDone', headerName: 'Done', width: 130,
             renderCell(value: any) {
                 const { row } = value;
-                return (<Checkbox checked={row.isDone} onChange={() => handleCheckTodo(listTodo, row)} />);
+                return (<Checkbox checked={row.isDone} onChange={() => handleCheckTodo(row)} />);
             }
         },
         {
@@ -45,14 +46,18 @@ const TodoList = () => {
             sortable: false,
             field: 'action', headerName: 'Action', width: 130,
             renderCell(value: any) {
+                if(!Session.isLogedIn()) {
+                    return "";
+                }
+
                 const { row } = value;
                 return (
                     <Grid container spacing={2}>
                         <Grid item xs={6}>
-                            <Button onClick={() => handleRemoveTodo(listTodo, row.description)}><DeleteForever color="error" /></Button>
+                            <Button onClick={() => navigateApp("/form-todo?edit", { state: { data: row } })}><Edit color="warning" /></Button>
                         </Grid>
                         <Grid item xs={6}>
-                            <Button onClick={() => navigateApp("/form-todo?edit", {state: {data: row}})}><Edit color="warning" /></Button>
+                            <Button id="btn-delete" onClick={() => handleRemoveTodo(listTodo, row.description)}><DeleteForever color="error" /></Button>
                         </Grid>
                     </Grid>
                 );
@@ -69,9 +74,9 @@ const TodoList = () => {
         setListTodo(todos);
     }
 
-    function handleCheckTodo(items: MyTodo[], item: MyTodo) {
+    function handleCheckTodo(item: MyTodo) {
         item.isDone = !item.isDone;
-        updateTodo(items, item);
+        updateTodo(item);
         getAllTodos();
     }
 
@@ -83,6 +88,15 @@ const TodoList = () => {
     React.useEffect(() => {
         getAllTodos();
     }, []);
+
+    const handleLogout = () => {
+        Session.clearSession();
+        navigateApp("/login", {
+            state: {
+                logout: true,
+            }
+        });
+    }
 
     return (
         <ThemeProvider theme={theme}>
@@ -96,16 +110,29 @@ const TodoList = () => {
                         alignItems: 'center',
                     }}
                 >
-                    <Card style={{ width: 640 }}>
+                    <Card style={{ width: 720 }}>
                         <Box padding={5}>
                             <Grid container spacing={2}>
-                                <Grid item xs={8}>
+                                <Grid item xs={7}>
                                     <Typography marginBottom={5} align="left">My Todo List</Typography>
                                 </Grid>
-                                <Grid item xs={4}>
+                                <Grid item xs={3}>
                                     <Button variant="outlined" onClick={() => navigateApp("/form-todo")}>
                                         + New Todo
                                     </Button>
+                                </Grid>
+                                <Grid item xs={2}>
+                                    {
+                                        !Session.isLogedIn() ? (
+                                            <Button variant="text" onClick={() => navigateApp("/login")}>
+                                                <Login />
+                                            </Button>
+                                        ) : (
+                                            <Button variant="text" onClick={handleLogout}>
+                                                <Logout />
+                                            </Button>
+                                        )
+                                    }
                                 </Grid>
                             </Grid>
 
