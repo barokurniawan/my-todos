@@ -16,6 +16,8 @@ import { AlertError, AlertSuccess } from '../widgets/alerts';
 import { MyTodo, saveTodo, updateTodo } from '../persisntace/todos';
 import FormImagePreview from './widgets/form-image-preview';
 import FormSelectImage from './widgets/form-select-image';
+import SpinButton from '../widgets/spin_button';
+import { Collapse, Slide } from '@mui/material';
 
 const theme = createTheme();
 export default function FormTodo() {
@@ -26,6 +28,7 @@ export default function FormTodo() {
     const navigateApp = useNavigate();
     const location = useLocation();
     const [todo, setTodo] = React.useState<MyTodo | null>(null);
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -39,6 +42,7 @@ export default function FormTodo() {
             return;
         }
 
+        setIsLoading(true);
         try {
             if (isEditMode()) {
                 console.log("Updating todo: ", desc);
@@ -79,6 +83,8 @@ export default function FormTodo() {
                 message: errorMessage
             });
         }
+
+        setIsLoading(false);
     };
 
     const onFileSelected = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,6 +135,15 @@ export default function FormTodo() {
         }
     }, []);
 
+    React.useEffect(() => {
+        if(alert) {
+            setTimeout(() => {
+                setAlert(null);
+            }, 3500);
+        }
+
+    }, [alert]);
+
     return (
         <ThemeProvider theme={theme}>
             <Container component="main" maxWidth="xs">
@@ -153,13 +168,12 @@ export default function FormTodo() {
                         </Grid>
                     </Grid>
 
-                    {
-                        alert && (
-                            alert.status == "success"
-                                ? <AlertSuccess style={{ width: "100%", marginBottom: "14px" }} msg={alert.message} />
-                                : <AlertError style={{ width: "100%", marginBottom: "14px" }} msg={alert?.message} />
-                        )
-                    }
+                    <Box width={"100%"}>
+                        <Collapse in={alert != null}>
+                            {alert && alert.status == "success" && <AlertSuccess style={{ width: "100%", marginBottom: "14px" }} msg={alert.message} />}
+                            {alert && alert.status != "success" && <AlertError style={{ width: "100%", marginBottom: "14px" }} msg={alert?.message} />}
+                        </Collapse>
+                    </Box>
 
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
                         <Grid container>
@@ -195,14 +209,7 @@ export default function FormTodo() {
                             </Grid>
                         </Grid>
 
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                        >
-                            Submit
-                        </Button>
+                        <SpinButton fullWidth={true} label='Submit' type='submit' variant='contained' loading={isLoading} />
                     </Box>
                 </Box>
             </Container>
