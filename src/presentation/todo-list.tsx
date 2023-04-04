@@ -1,9 +1,8 @@
 import React from "react";
-import { Box, Button, Card, Checkbox, Collapse, Container, CssBaseline, Grid, IconButton, ImageListItem, List, ListItem, ListItemIcon, ListItemText, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { Box, Button, Card, Checkbox, Collapse, Container, CssBaseline, FormControl, Grid, IconButton, ImageListItem, InputLabel, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, ThemeProvider, Typography, createTheme } from "@mui/material";
 import { MyTodo, fetchTodos, removeTodo, updateTodo } from "../persisntace/todos";
 import { useNavigate } from "react-router-dom";
-import { DeleteForever, Edit, EditAttributes, Login, Logout } from "@mui/icons-material";
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DeleteForever, Edit, Login, Logout } from "@mui/icons-material";
 import * as Session from "../persisntace/session";
 import { TransitionGroup } from 'react-transition-group';
 import dayjs from "dayjs";
@@ -17,67 +16,22 @@ const theme = createTheme({
 });
 const TodoList = () => {
     const [listTodo, setListTodo] = React.useState<MyTodo[]>([]);
+    const [filter, setFilter] = React.useState("sortAscDueDate");
     const navigateApp = useNavigate();
-    const columns: GridColDef[] = [
-        { field: 'description', headerName: 'Description', width: 130, sortable: false, },
-        { field: 'dueDate', headerName: 'Due Date', width: 130 },
-        {
-            sortable: false,
-            field: 'isDone', headerName: 'Done', width: 130,
-            renderCell(value: any) {
-                const { row } = value;
-                return (<Checkbox checked={row.isDone} onChange={() => handleCheckTodo(row)} />);
-            }
-        },
-        {
-            sortable: false,
-            field: "imageSnapshot", headerName: "Image", width: 115,
-            renderCell(value: any) {
-                const { row } = value as { row: MyTodo };
-                if (!row.imageSnapshot) {
-                    return "";
-                }
-
-                return (
-                    <Box component={"img"} width={120}
-                        src={row.imageSnapshot}
-                        style={{
-                            border: "1x solid #eaeaea",
-                            borderRadius: "10px",
-                            backgroundColor: "grey"
-                        }}
-                    />
-                )
-            }
-        },
-        {
-            sortable: false,
-            field: 'action', headerName: 'Action', width: 130,
-            renderCell(value: any) {
-                if (!Session.isLogedIn()) {
-                    return "";
-                }
-
-                const { row } = value;
-                return (
-                    <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                            <Button onClick={() => navigateApp("/form-todo?edit", { state: { data: row } })}><Edit color="warning" /></Button>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Button id="btn-delete" onClick={() => handleRemoveTodo(listTodo, row.description)}><DeleteForever color="error" /></Button>
-                        </Grid>
-                    </Grid>
-                );
-            },
-        },
-    ];
 
     function getAllTodos() {
         let todos = fetchTodos();
         if (!todos) {
             todos = [];
         }
+
+        todos.sort((a, b) => {
+            if (filter == "sortDescDueDate") {
+                return new Date(b.dueDate).valueOf() - new Date(a.dueDate).valueOf()
+            }
+
+            return new Date(a.dueDate).valueOf() - new Date(b.dueDate).valueOf()
+        });
 
         setListTodo(todos);
     }
@@ -95,7 +49,7 @@ const TodoList = () => {
 
     React.useEffect(() => {
         getAllTodos();
-    }, []);
+    }, [filter]);
 
     const handleLogout = () => {
         Session.clearSession();
@@ -141,6 +95,26 @@ const TodoList = () => {
                                             </Button>
                                         )
                                     }
+                                </Grid>
+                            </Grid>
+
+                            <Grid container spacing={2}>
+                                <Grid item xs={8}></Grid>
+                                <Grid item xs={4}>
+                                    <FormControl variant="standard" fullWidth>
+                                        <InputLabel id="demo-simple-select-label">Sort</InputLabel>
+                                        <Select
+                                            size="small"
+                                            labelId="demo-simple-select-label"
+                                            id="demo-simple-select"
+                                            value={filter}
+                                            label="Sort"
+                                            onChange={(evt) => setFilter(evt.target.value)}
+                                        >
+                                            <MenuItem value="sortAscDueDate">Asc Due Date</MenuItem>
+                                            <MenuItem value="sortDescDueDate">Desc Due Date</MenuItem>
+                                        </Select>
+                                    </FormControl>
                                 </Grid>
                             </Grid>
 
