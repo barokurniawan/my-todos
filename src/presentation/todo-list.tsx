@@ -8,7 +8,13 @@ import * as Session from "../persisntace/session";
 import { TransitionGroup } from 'react-transition-group';
 import dayjs from "dayjs";
 
-const theme = createTheme();
+const theme = createTheme({
+    palette: {
+        background: {
+            default: "#eaeaea"
+        }
+    }
+});
 const TodoList = () => {
     const [listTodo, setListTodo] = React.useState<MyTodo[]>([]);
     const navigateApp = useNavigate();
