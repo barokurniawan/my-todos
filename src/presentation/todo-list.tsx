@@ -1,10 +1,12 @@
 import React from "react";
-import { Box, Button, Card, Checkbox, Container, CssBaseline, Grid, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { Box, Button, Card, Checkbox, Collapse, Container, CssBaseline, Grid, IconButton, ImageListItem, List, ListItem, ListItemIcon, ListItemText, ThemeProvider, Typography, createTheme } from "@mui/material";
 import { MyTodo, fetchTodos, removeTodo, updateTodo } from "../persisntace/todos";
 import { useNavigate } from "react-router-dom";
-import { DeleteForever, Edit, Login, Logout } from "@mui/icons-material";
+import { DeleteForever, Edit, EditAttributes, Login, Logout } from "@mui/icons-material";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import * as Session from "../persisntace/session";
+import { TransitionGroup } from 'react-transition-group';
+import dayjs from "dayjs";
 
 const theme = createTheme();
 const TodoList = () => {
@@ -46,7 +48,7 @@ const TodoList = () => {
             sortable: false,
             field: 'action', headerName: 'Action', width: 130,
             renderCell(value: any) {
-                if(!Session.isLogedIn()) {
+                if (!Session.isLogedIn()) {
                     return "";
                 }
 
@@ -136,16 +138,54 @@ const TodoList = () => {
                                 </Grid>
                             </Grid>
 
-                            <div style={{ height: 400, width: '100%' }}>
-                                <DataGrid
-                                    rows={listTodo}
-                                    columns={columns}
-                                    disableColumnMenu
-                                    disableColumnSelector
-                                    disableRowSelectionOnClick
-                                    hideFooterPagination={true}
-                                />
-                            </div>
+                            <Box sx={{ mt: 1 }}>
+                                <List>
+                                    <TransitionGroup>
+                                        {listTodo.map((item) => (
+                                            <Collapse key={item.id}>
+                                                <ListItem
+                                                    secondaryAction={Session.isLogedIn() && (
+                                                        <div>
+                                                            <IconButton
+                                                                style={{ marginRight: 10 }}
+                                                                edge="end"
+                                                                aria-label="edit"
+                                                                title="Edit"
+                                                                onClick={() => navigateApp("/form-todo?edit", { state: { data: item } })}
+                                                            >
+                                                                <Edit color="warning" />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                edge="end"
+                                                                aria-label="delete"
+                                                                title="Delete"
+                                                                onClick={() => handleRemoveTodo(listTodo, item.description)}
+                                                            >
+                                                                <DeleteForever color="error" />
+                                                            </IconButton>
+                                                        </div>
+                                                    )}
+                                                >
+                                                    <ListItemIcon>
+                                                        <Checkbox checked={item.isDone} onChange={() => handleCheckTodo(item)} />
+                                                    </ListItemIcon>
+                                                    <ListItemText primary={item.description} secondary={`Due date: ${dayjs(item.dueDate).format("DD/MM/YYYY")}`} />
+                                                    <ListItem>
+                                                        <Box component={"img"} width={120}
+                                                            src={item.imageSnapshot}
+                                                            style={{
+                                                                border: "1x solid #eaeaea",
+                                                                borderRadius: "10px",
+                                                                backgroundColor: "grey"
+                                                            }}
+                                                        />
+                                                    </ListItem>
+                                                </ListItem>
+                                            </Collapse>
+                                        ))}
+                                    </TransitionGroup>
+                                </List>
+                            </Box>
                         </Box>
                     </Card>
                 </Box>
