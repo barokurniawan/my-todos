@@ -1,6 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor, waitForElementToBeRemoved } from "@testing-library/react"
 import TodoList from "./todo-list"
 import { BrowserRouter } from "react-router-dom";
+import * as Session from "../persisntace/session";
 
 test('display list todo', () => {
     render(
@@ -39,18 +40,21 @@ describe("Test delete todo", () => {
         Object.defineProperty(window, 'localStorage', {
             value: localStorageMock
         });
+
+        jest.spyOn(Session, "isLogedIn").mockImplementation(() => true);
     })
 
-    test('Can delete a todo', () => {
-        const vdom = render(
+    test('Can delete a todo', async () => {
+        render(
             <BrowserRouter>
                 <TodoList />
             </BrowserRouter>
         );
 
-        const btnDelete = vdom.container.querySelector("#btn-delete")!;
-        console.log(btnDelete);
-        
-        fireEvent.click(btnDelete);
+        const buttons = await screen.findAllByTitle("Delete");
+        fireEvent.click(buttons[0]);
+        await waitFor(() => {
+            expect(buttons[0]).not.toBeInTheDocument()
+        })
     });
 });
