@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import React from "react";
 import Alert from "@mui/material/Alert";
 
 const AlertError = (props: {msg: string, style?: React.CSSProperties}) => {
